@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useInfiniteQuery, useMutation, useQuery } from "@tanstack/react-query";
 import axios from "axios";
@@ -70,6 +70,27 @@ function UserPlusIcon() {
       <circle cx="9" cy="7" r="4"></circle>
       <line x1="19" x2="19" y1="8" y2="14"></line>
       <line x1="22" x2="16" y1="11" y2="11"></line>
+    </svg>
+  );
+}
+
+function ArrowLeftIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="lucide lucide-arrow-left"
+      aria-hidden="true"
+    >
+      <path d="m12 19-7-7 7-7"></path>
+      <path d="M19 12H5"></path>
     </svg>
   );
 }
@@ -340,14 +361,52 @@ function buildUsersFromPages(pages, currentUserId) {
   return Array.from(usersMap.values()).sort((a, b) => b.followersCount - a.followersCount);
 }
 
-export default function SearchUser() {
+export default function SearchUser({ mode = "desktop" }) {
+  const isMobileMode = mode === "mobile";
   const token = localStorage.getItem("User_Token");
   const [searchValue, setSearchValue] = useState("");
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [isMobileAllUsersOpen, setIsMobileAllUsersOpen] = useState(false);
   const [followOverrides, setFollowOverrides] = useState({});
   const [followLoadingById, setFollowLoadingById] = useState({});
   const [followError, setFollowError] = useState("");
   const searchQuery = searchValue.trim();
-  const isSearchMode = Boolean(searchQuery);
+  const isSearchVisible = !isMobileMode || isMobileOpen || isMobileAllUsersOpen;
+  const isSearchMode = isSearchVisible && Boolean(searchQuery);
+
+  useEffect(() => {
+    if (!isMobileMode || !isMobileAllUsersOpen) return undefined;
+
+    const bodyStyle = document.body.style;
+    const htmlStyle = document.documentElement.style;
+    const previousBodyPosition = bodyStyle.position;
+    const previousBodyTop = bodyStyle.top;
+    const previousBodyLeft = bodyStyle.left;
+    const previousBodyRight = bodyStyle.right;
+    const previousBodyWidth = bodyStyle.width;
+    const previousBodyOverflow = bodyStyle.overflow;
+    const previousHtmlOverflow = htmlStyle.overflow;
+    const scrollY = window.scrollY;
+
+    bodyStyle.position = "fixed";
+    bodyStyle.top = `-${scrollY}px`;
+    bodyStyle.left = "0";
+    bodyStyle.right = "0";
+    bodyStyle.width = "100%";
+    bodyStyle.overflow = "hidden";
+    htmlStyle.overflow = "hidden";
+
+    return () => {
+      bodyStyle.position = previousBodyPosition;
+      bodyStyle.top = previousBodyTop;
+      bodyStyle.left = previousBodyLeft;
+      bodyStyle.right = previousBodyRight;
+      bodyStyle.width = previousBodyWidth;
+      bodyStyle.overflow = previousBodyOverflow;
+      htmlStyle.overflow = previousHtmlOverflow;
+      window.scrollTo(0, scrollY);
+    };
+  }, [isMobileMode, isMobileAllUsersOpen]);
 
   const { data: currentUser } = useQuery({
     queryKey: ["search-user-current-profile", token],
@@ -446,6 +505,279 @@ export default function SearchUser() {
     });
   }
 
+  const usersList = users.length > 0 ? (
+    <div className="space-y-3">
+      {users.map((user) => {
+        const override = followOverrides[user.id];
+        const isFollowing = override?.isFollowing ?? Boolean(user.isFollowing);
+        const followersCount = override?.followersCount ?? user.followersCount;
+        const isFollowLoading = Boolean(followLoadingById[user.id]);
+
+        return (
+          <div key={user.id} className="rounded-xl border border-slate-200 p-2.5">
+            <div className="flex items-center justify-between gap-2">
+              <Link
+                to={`/profile/${user.id}`}
+                className="flex min-w-0 items-center gap-2 rounded-lg px-1 py-1 text-left transition hover:bg-slate-50"
+              >
+                <img
+                  alt={user.name}
+                  className="h-10 w-10 rounded-full object-cover"
+                  src={user.photo}
+                  onError={(event) => {
+                    event.currentTarget.src = DEFAULT_PROFILE_IMAGE;
+                  }}
+                />
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-bold text-slate-900 hover:underline">
+                    {user.name}
+                  </p>
+                  <p className="truncate text-xs text-slate-500">@{user.username}</p>
+                </div>
+              </Link>
+
+              <button
+                type="button"
+                onClick={() => handleFollowToggle(user)}
+                disabled={isFollowLoading}
+                className={`inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold transition disabled:cursor-not-allowed disabled:opacity-70 ${
+                  isFollowing
+                    ? "bg-slate-200 text-slate-700 hover:bg-slate-300"
+                    : "bg-[#e7f3ff] text-[#1877f2] hover:bg-[#d8ebff]"
+                }`}
+              >
+                <UserPlusIcon />
+                {isFollowLoading ? "Updating..." : isFollowing ? "Unfollow" : "Follow"}
+              </button>
+            </div>
+            <div className="mt-2 flex items-center gap-2 text-[11px] font-semibold text-slate-500">
+              <span className="rounded-full bg-slate-100 px-2 py-0.5">
+                {followersCount} followers
+              </span>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  ) : (
+    <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-500">
+      No users found.
+    </div>
+  );
+
+  const usersGridList = users.length > 0 ? (
+    <div className="grid gap-3 sm:grid-cols-2">
+      {users.map((user) => {
+        const override = followOverrides[user.id];
+        const isFollowing = override?.isFollowing ?? Boolean(user.isFollowing);
+        const followersCount = override?.followersCount ?? user.followersCount;
+        const isFollowLoading = Boolean(followLoadingById[user.id]);
+
+        return (
+          <article key={`grid-${user.id}`} className="rounded-xl border border-slate-200 p-3">
+            <div className="flex items-center justify-between gap-3">
+              <Link
+                to={`/profile/${user.id}`}
+                className="flex min-w-0 items-center gap-3 rounded-lg px-1 py-1 text-left transition hover:bg-slate-50"
+              >
+                <img
+                  alt={user.name}
+                  className="h-12 w-12 rounded-full object-cover"
+                  src={user.photo}
+                  onError={(event) => {
+                    event.currentTarget.src = DEFAULT_PROFILE_IMAGE;
+                  }}
+                />
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-bold text-slate-900 hover:underline">
+                    {user.name}
+                  </p>
+                  <p className="truncate text-xs text-slate-500">@{user.username}</p>
+                </div>
+              </Link>
+              <button
+                type="button"
+                onClick={() => handleFollowToggle(user)}
+                disabled={isFollowLoading}
+                className={`inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold transition disabled:cursor-not-allowed disabled:opacity-70 ${
+                  isFollowing
+                    ? "bg-slate-200 text-slate-700 hover:bg-slate-300"
+                    : "bg-[#e7f3ff] text-[#1877f2] hover:bg-[#d8ebff]"
+                }`}
+              >
+                <UserPlusIcon />
+                {isFollowLoading ? "Updating..." : isFollowing ? "Unfollow" : "Follow"}
+              </button>
+            </div>
+            <div className="mt-2 flex items-center gap-2 text-[11px] font-semibold text-slate-500">
+              <span className="rounded-full bg-slate-100 px-2 py-0.5">
+                {followersCount} followers
+              </span>
+              <span className="rounded-full bg-[#edf4ff] px-2 py-0.5 text-[#1877f2]">
+                1 mutual
+              </span>
+            </div>
+          </article>
+        );
+      })}
+    </div>
+  ) : (
+    <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-500">
+      No users found.
+    </div>
+  );
+
+  const statusBlocks = (
+    <>
+      {!token ? (
+        <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-500">
+          Login to view suggested users.
+        </div>
+      ) : null}
+
+      {token && isLoading ? (
+        <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-500">
+          Loading suggestions...
+        </div>
+      ) : null}
+
+      {token && !isLoading && error ? (
+        <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-600">
+          {errorMessage}
+        </div>
+      ) : null}
+
+      {token && !error && followError ? (
+        <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-600">
+          {followError}
+        </div>
+      ) : null}
+    </>
+  );
+
+  if (isMobileMode && isMobileAllUsersOpen) {
+    return (
+      <div className="fixed inset-0 z-[70] overflow-y-auto bg-[#f0f2f5] xl:hidden">
+        <div className="mx-auto max-w-7xl px-3 py-3.5">
+          <main className="min-w-0">
+            <div className="mx-auto max-w-4xl space-y-4">
+              <button
+                type="button"
+                onClick={() => setIsMobileAllUsersOpen(false)}
+                className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-slate-700 transition hover:bg-slate-50"
+              >
+                <ArrowLeftIcon />
+                Back to feed
+              </button>
+
+              <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                <div className="mb-3 flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <UsersIcon />
+                    <h1 className="text-xl font-extrabold text-slate-900">All Suggested Friends</h1>
+                  </div>
+                  <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-bold text-slate-600">
+                    {isLoading ? "..." : users.length}
+                  </span>
+                </div>
+
+                <label className="relative mb-4 block">
+                  <SearchIcon />
+                  <input
+                    placeholder="Search by name or username..."
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-3 text-sm text-slate-700 outline-none focus:border-[#1877f2] focus:bg-white"
+                    value={searchValue}
+                    onChange={(event) => setSearchValue(event.target.value)}
+                  />
+                </label>
+
+                {statusBlocks}
+
+                {token && !isLoading && !error ? (
+                  <>
+                    {isFetching ? (
+                      <p className="mb-2 text-[11px] font-semibold text-slate-500">Refreshing...</p>
+                    ) : null}
+
+                    {usersGridList}
+
+                    {hasMoreUsers ? (
+                      <button
+                        type="button"
+                        className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-bold text-slate-700 transition hover:bg-slate-100 disabled:opacity-60"
+                        onClick={() => suggestionsQuery.fetchNextPage()}
+                        disabled={isLoadingMore}
+                      >
+                        {isLoadingMore ? "Loading..." : "Load more users"}
+                      </button>
+                    ) : null}
+                  </>
+                ) : null}
+              </section>
+            </div>
+          </main>
+        </div>
+      </div>
+    );
+  }
+
+  if (isMobileMode) {
+    return (
+      <div className="space-y-3 xl:hidden">
+        <button
+          type="button"
+          onClick={() => setIsMobileOpen((prev) => !prev)}
+          className="inline-flex w-full items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left shadow-sm"
+        >
+          <span className="inline-flex items-center gap-2 text-sm font-extrabold text-slate-900">
+            <UsersIcon />
+            Suggested Friends
+          </span>
+          <span className="inline-flex items-center gap-2">
+            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-bold text-slate-600">
+              {isLoading ? "..." : users.length}
+            </span>
+            <span className="text-xs font-bold text-[#1877f2]">
+              {isMobileOpen ? "Hide" : "Show"}
+            </span>
+          </span>
+        </button>
+
+        {isMobileOpen ? (
+          <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
+            <label className="relative mb-3 block">
+              <SearchIcon />
+              <input
+                placeholder="Search friends..."
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-sm text-slate-700 outline-none focus:border-[#1877f2] focus:bg-white"
+                value={searchValue}
+                onChange={(event) => setSearchValue(event.target.value)}
+              />
+            </label>
+
+            {statusBlocks}
+
+            {token && !isLoading && !error ? (
+              <>
+                {isFetching ? (
+                  <p className="mb-2 text-[11px] font-semibold text-slate-500">Refreshing...</p>
+                ) : null}
+                {usersList}
+                <button
+                  type="button"
+                  className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-bold text-slate-700 transition hover:bg-slate-100"
+                  onClick={() => setIsMobileAllUsersOpen(true)}
+                >
+                  Add more
+                </button>
+              </>
+            ) : null}
+          </div>
+        ) : null}
+      </div>
+    );
+  }
+
   return (
     <aside className="hidden h-fit xl:sticky xl:top-[84px] xl:block">
       <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
@@ -471,29 +803,7 @@ export default function SearchUser() {
           </label>
         </div>
 
-        {!token ? (
-          <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-500">
-            Login to view suggested users.
-          </div>
-        ) : null}
-
-        {token && isLoading ? (
-          <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-500">
-            Loading suggestions...
-          </div>
-        ) : null}
-
-        {token && !isLoading && error ? (
-          <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-600">
-            {errorMessage}
-          </div>
-        ) : null}
-
-        {token && !error && followError ? (
-          <div className="mb-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-600">
-            {followError}
-          </div>
-        ) : null}
+        {statusBlocks}
 
         {token && !isLoading && !error ? (
           <>
@@ -501,73 +811,7 @@ export default function SearchUser() {
               <p className="mb-2 text-[11px] font-semibold text-slate-500">Refreshing...</p>
             ) : null}
 
-            {users.length > 0 ? (
-              <div className="space-y-3">
-                {users.map((user) => (
-                  <div key={user.id} className="rounded-xl border border-slate-200 p-2.5">
-                    {(() => {
-                      const override = followOverrides[user.id];
-                      const isFollowing = override?.isFollowing ?? Boolean(user.isFollowing);
-                      const followersCount = override?.followersCount ?? user.followersCount;
-                      const isFollowLoading = Boolean(followLoadingById[user.id]);
-
-                      return (
-                        <>
-                          <div className="flex items-center justify-between gap-2">
-                            <Link
-                              to={`/profile/${user.id}`}
-                              className="flex min-w-0 items-center gap-2 rounded-lg px-1 py-1 text-left transition hover:bg-slate-50"
-                            >
-                              <img
-                                alt={user.name}
-                                className="h-10 w-10 rounded-full object-cover"
-                                src={user.photo}
-                                onError={(event) => {
-                                  event.currentTarget.src = DEFAULT_PROFILE_IMAGE;
-                                }}
-                              />
-                              <div className="min-w-0">
-                                <p className="truncate text-sm font-bold text-slate-900 hover:underline">
-                                  {user.name}
-                                </p>
-                                <p className="truncate text-xs text-slate-500">@{user.username}</p>
-                              </div>
-                            </Link>
-
-                            <button
-                              type="button"
-                              onClick={() => handleFollowToggle(user)}
-                              disabled={isFollowLoading}
-                              className={`inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold transition disabled:cursor-not-allowed disabled:opacity-70 ${
-                                isFollowing
-                                  ? "bg-slate-200 text-slate-700 hover:bg-slate-300"
-                                  : "bg-[#e7f3ff] text-[#1877f2] hover:bg-[#d8ebff]"
-                              }`}
-                            >
-                              <UserPlusIcon />
-                              {isFollowLoading
-                                ? "Updating..."
-                                : isFollowing
-                                  ? "Unfollow"
-                                  : "Follow"}
-                            </button>
-                          </div>
-                          <div className="mt-2 flex items-center gap-2 text-[11px] font-semibold text-slate-500">
-                            <span className="rounded-full bg-slate-100 px-2 py-0.5">
-                              {followersCount} followers
-                            </span>
-                          </div>
-                        </>
-                      );
-                    })()}
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-500">
-                No users found.
-              </div>
-            )}
+            {usersList}
 
             {hasMoreUsers ? (
               <button

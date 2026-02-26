@@ -98,28 +98,54 @@ const FILTER_OPTIONS = [
 
 export default function FilterPosts({ activeFilter, onFilterChange }) {
   return (
-    <aside className="hidden h-fit space-y-3 xl:sticky xl:top-[84px] xl:block">
-      <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
-        {FILTER_OPTIONS.map((option, index) => {
-          const isActive = activeFilter === option.key;
-          return (
-            <button
-              key={option.key}
-              type="button"
-              onClick={() => onFilterChange(option.key)}
-              aria-pressed={isActive}
-              className={`flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm font-bold transition ${
-                isActive
-                  ? "bg-[#e7f3ff] text-[#1877f2]"
-                  : "text-slate-700 hover:bg-slate-100"
-              } ${index > 0 ? "mt-1" : ""}`}
-            >
-              {option.icon}
-              {option.label}
-            </button>
-          );
-        })}
+    <>
+      <aside className="hidden h-fit space-y-3 xl:sticky xl:top-[84px] xl:block">
+        <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
+          {FILTER_OPTIONS.map((option, index) => {
+            const isActive = activeFilter === option.key;
+            return (
+              <button
+                key={option.key}
+                type="button"
+                onClick={() => onFilterChange(option.key)}
+                aria-pressed={isActive}
+                className={`flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm font-bold transition ${
+                  isActive
+                    ? "bg-[#e7f3ff] text-[#1877f2]"
+                    : "text-slate-700 hover:bg-slate-100"
+                } ${index > 0 ? "mt-1" : ""}`}
+              >
+                {option.icon}
+                {option.label}
+              </button>
+            );
+          })}
+        </div>
+      </aside>
+
+      <div className="rounded-2xl border border-slate-200 bg-white p-2 shadow-sm xl:hidden">
+        <div className="grid grid-cols-2 gap-2">
+          {FILTER_OPTIONS.map((option) => {
+            const isActive = activeFilter === option.key;
+            return (
+              <button
+                key={`mobile-${option.key}`}
+                type="button"
+                onClick={() => onFilterChange(option.key)}
+                aria-pressed={isActive}
+                className={`flex items-center justify-center gap-2 rounded-xl px-3 py-2 text-sm font-bold transition ${
+                  isActive
+                    ? "bg-[#e7f3ff] text-[#1877f2]"
+                    : "bg-slate-50 text-slate-700 hover:bg-slate-100"
+                }`}
+              >
+                {option.icon}
+                {option.label}
+              </button>
+            );
+          })}
+        </div>
       </div>
-    </aside>
+    </>
   );
 }

@@ -195,15 +195,6 @@ export default function PostsListing() {
     extractApiMessage(error, "") ||
     (!token ? "You need to login first." : "Failed to load posts. Please refresh.");
 
-  const currentFeedTitle =
-    activeFilter === "feed"
-      ? "Feed"
-      : activeFilter === "my-posts"
-      ? "My Posts"
-      : activeFilter === "saved"
-      ? "Saved"
-      : "Community";
-
   const emptyMessage =
     activeFilter === "feed"
       ? "No posts from following users yet."
@@ -215,55 +206,58 @@ export default function PostsListing() {
 
   return (
     <div className="min-h-[calc(100vh-70px)] bg-[#f0f2f5]">
-      <div className="mx-auto max-w-7xl px-3 py-5">
-        <div className="xl:grid xl:grid-cols-[248px_minmax(0,1fr)_320px] xl:items-start xl:gap-6">
-          <FilterPosts activeFilter={activeFilter} onFilterChange={setActiveFilter} />
+      <div className="mx-auto max-w-7xl px-3 py-3.5">
+        <main className="min-w-0">
+          <div className="grid gap-4 xl:grid-cols-[240px_minmax(0,1fr)_300px]">
+            <FilterPosts activeFilter={activeFilter} onFilterChange={setActiveFilter} />
 
-          <div className="mx-auto w-full max-w-3xl space-y-4 xl:mx-0">
-            {token ? <PostForm /> : null}
+            <section className="space-y-4">
+              <SearchUser mode="mobile" />
 
-            {token ? (
-              <div className="rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
-                <div className="flex items-center justify-between gap-2">
-                  <h2 className="text-base font-extrabold text-slate-900">{currentFeedTitle}</h2>
-                  {isFetching ? (
-                    <span className="text-xs font-semibold text-slate-500">Refreshing...</span>
-                  ) : null}
+              {token ? <PostForm /> : null}
+
+              {!token ? (
+                <div className="rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-500 shadow-sm">
+                  You need to login first.
                 </div>
-              </div>
-            ) : null}
+              ) : null}
 
-            {!token ? (
-              <div className="rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-500 shadow-sm">
-                You need to login first.
-              </div>
-            ) : null}
+              {isLoading ? (
+                <div className="rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-500 shadow-sm">
+                  Loading posts...
+                </div>
+              ) : null}
 
-            {isLoading ? (
-              <div className="rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-500 shadow-sm">
-                Loading posts...
-              </div>
-            ) : null}
+              {!isLoading && error ? (
+                <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 shadow-sm">
+                  {errorMessage}
+                </div>
+              ) : null}
 
-            {!isLoading && error ? (
-              <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 shadow-sm">
-                {errorMessage}
-              </div>
-            ) : null}
+              {token && !isLoading && !error && posts.length === 0 ? (
+                <div className="rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-500 shadow-sm">
+                  {emptyMessage}
+                </div>
+              ) : null}
 
-            {token && !isLoading && !error && posts.length === 0 ? (
-              <div className="rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-500 shadow-sm">
-                {emptyMessage}
-              </div>
-            ) : null}
+              {token && !isLoading && !error ? (
+                <div className="space-y-4">
+                  {posts.map((post) => (
+                    <PostCard key={post?._id || post?.id} post={post} />
+                  ))}
 
-            {token && !isLoading && !error
-              ? posts.map((post) => <PostCard key={post?._id || post?.id} post={post} />)
-              : null}
+                  <div className="flex min-h-10 items-center justify-center">
+                    <span className="text-xs font-semibold text-slate-400">
+                      {isFetching ? "Refreshing..." : "You reached the end"}
+                    </span>
+                  </div>
+                </div>
+              ) : null}
+            </section>
+
+            <SearchUser mode="desktop" />
           </div>
-
-          <SearchUser />
-        </div>
+        </main>
       </div>
     </div>
   );
