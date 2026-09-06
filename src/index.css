@@ -1,0 +1,358 @@
+@import url("https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Playfair+Display:ital@1&display=swap");
+@import "tailwindcss";
+@plugin './hero.ts';
+@source '../node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}';
+
+/* ═══════════════════════════════════════════════════════════════
+   AURA — The Accession Card
+   Brand law: docs/brand-guidelines.md. This file resolves it into a
+   working two-theme system.
+
+   Both themes are designed, not inverted. Light is a gallery wall in
+   daylight; dark is the same object in a night vitrine. Neither is
+   the "real" one.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── LIGHT · the gallery wall ─────────────────────────────────── */
+:root,
+:root[data-theme="light"] {
+  --ground: #f7f4ef; /* warm bone wall */
+  --plate: #ffffff; /* the mounted work */
+  --recess: #efebe4; /* wells, inputs, vitrine shadow */
+  --rail: #e4dfd6; /* hairlines, the hanging line */
+  --rail-strong: #d3ccc0;
+
+  --ink: #1a1613; /* label ink, warm rather than pure black */
+  --ink-2: #57514a; /* secondary label text */
+  --ink-3: #726b64; /* catalogue notation — 4.8:1 on the wall, 5.3:1 on a plate */
+
+  --verm: #e4572e;
+  --verm-ink: #b93d19; /* vermilion legible as text on bone */
+  --on-verm: #0b0a0a; /* white on vermilion is only 3.7:1; ink is 5.4:1 */
+  --gold-ink: #8a6304;
+
+  --plate-shadow: 0 1px 2px rgba(26, 22, 19, 0.05), 0 8px 24px rgba(26, 22, 19, 0.06);
+  --plate-shadow-lifted: 0 2px 6px rgba(26, 22, 19, 0.07), 0 20px 48px rgba(26, 22, 19, 0.11);
+}
+
+/* ── DARK · the night vitrine ─────────────────────────────────── */
+:root[data-theme="dark"] {
+  --ground: #0b0a0a;
+  --plate: #141211;
+  --recess: #1c1917;
+  --rail: #292827;
+  --rail-strong: #3b3733;
+
+  --ink: #f5f1ea;
+  --ink-2: #a79e93;
+  --ink-3: #877e74; /* brand's #6E665D only reached 3.3:1 in the vitrine */
+
+  --verm: #e4572e;
+  --verm-ink: #f06b45;
+  --on-verm: #0b0a0a;
+  --gold-ink: #f5b301;
+
+  --plate-shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 8px 24px rgba(0, 0, 0, 0.4);
+  --plate-shadow-lifted: 0 2px 6px rgba(0, 0, 0, 0.55), 0 20px 48px rgba(0, 0, 0, 0.5);
+}
+
+/* `inline` keeps the utilities pointing at the vars rather than copying
+   their values, which is what lets one attribute flip the whole system. */
+@theme inline {
+  --color-ground: var(--ground);
+  --color-plate: var(--plate);
+  --color-recess: var(--recess);
+  --color-rail: var(--rail);
+  --color-rail-strong: var(--rail-strong);
+
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+
+  --color-verm: var(--verm);
+  --color-verm-ink: var(--verm-ink);
+  --color-on-verm: var(--on-verm);
+  --color-gold-ink: var(--gold-ink);
+
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --font-serif: "Playfair Display", ui-serif, serif;
+  --font-wordmark: "Bricolage Grotesque", "Inter", sans-serif;
+
+  /* Fixed rem scale — product UI is viewed at consistent DPI, so a
+     heading that shrinks inside a sidebar looks worse, not better. */
+  --text-micro: 0.6875rem; /* 11px — catalogue notation */
+  --text-label: 0.75rem; /* 12px — tombstone label */
+  --text-sm: 0.8125rem; /* 13px */
+  --text-base: 0.9375rem; /* 15px — UI body */
+  --text-read: 1.0625rem; /* 17px — the text of a work itself */
+  --text-lg: 1.25rem; /* 20px */
+  --text-xl: 1.625rem; /* 26px */
+  --text-2xl: 2.25rem; /* 36px */
+  --text-3xl: 3rem; /* 48px */
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: light dark;
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--verm) 22%, transparent);
+}
+
+:focus-visible {
+  outline: 2px solid var(--verm);
+  outline-offset: 2px;
+  border-radius: 1px;
+}
+
+/* ── motion ───────────────────────────────────────────────────────
+   Operate timings: 100-150ms feedback, 150-300ms routine state,
+   300-500ms layout and view transitions. Nothing waits on
+   choreography. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 320ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* The theme change is a light raised on the room: the incoming theme
+   wipes over the outgoing one, from the switch itself. */
+:root.theme-switching::view-transition-old(root) {
+  animation: none;
+}
+:root.theme-switching::view-transition-new(root) {
+  animation: theme-reveal 520ms cubic-bezier(0.16, 1, 0.3, 1);
+  clip-path: circle(140% at var(--theme-origin-x, 50%) var(--theme-origin-y, 50%));
+}
+@keyframes theme-reveal {
+  from {
+    clip-path: circle(0% at var(--theme-origin-x, 50%) var(--theme-origin-y, 50%));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001s !important;
+  }
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none !important;
+  }
+}
+
+/* ── form controls ────────────────────────────────────────────── */
+input,
+textarea,
+select,
+button {
+  font-family: inherit;
+}
+
+input,
+textarea,
+select {
+  caret-color: var(--verm);
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill {
+  -webkit-text-fill-color: var(--ink);
+  -webkit-box-shadow: 0 0 0 1000px var(--recess) inset;
+  box-shadow: 0 0 0 1000px var(--recess) inset;
+  caret-color: var(--verm);
+  transition: background-color 100000s ease-in-out 0s;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  opacity: 0.45;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+:root[data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 0.9;
+}
+
+input[type="search"]::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+option,
+optgroup {
+  background: var(--plate);
+  color: var(--ink);
+}
+
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+}
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 2px;
+  background: var(--rail-strong);
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  margin-top: -6px;
+  border-radius: 50%;
+  background: var(--verm);
+  cursor: grab;
+  transition: transform 0.15s ease;
+}
+input[type="range"]:hover::-webkit-slider-thumb {
+  transform: scale(1.15);
+}
+input[type="range"]:active::-webkit-slider-thumb {
+  cursor: grabbing;
+}
+input[type="range"]::-moz-range-track {
+  height: 2px;
+  background: var(--rail-strong);
+}
+input[type="range"]::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border: none;
+  border-radius: 50%;
+  background: var(--verm);
+  cursor: grab;
+}
+
+/* ── skeletons ────────────────────────────────────────────────────
+   Loading is a plate whose label has not been written yet, never a
+   spinner parked in the middle of the content. */
+@keyframes accession-shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--recess);
+}
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--ink) 6%, transparent),
+    transparent
+  );
+  animation: accession-shimmer 1.6s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .skeleton::after {
+    display: none;
+  }
+}
+
+/* ── condition notes ──────────────────────────────────────────────
+   A note arrives from the edge it will rest against and settles; its
+   remaining time retracts along the bottom rule. Both stop dead under
+   reduced motion, where the note simply appears. */
+@keyframes toast-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes toast-retract {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+
+.toast-note {
+  animation: toast-arrive 260ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.toast-timer {
+  animation: toast-retract linear both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast-note {
+    animation: none;
+  }
+  .toast-timer {
+    animation: none;
+    transform: scaleX(0);
+  }
+}
+
+/* ── the fetch rule ───────────────────────────────────────────────
+   A hairline along the very top edge while the collection is being
+   consulted. It is indeterminate on purpose: the API gives no progress,
+   so a bar that pretended to know would be lying. */
+@keyframes fetch-sweep {
+  0% {
+    transform: translateX(-100%) scaleX(0.4);
+  }
+  50% {
+    transform: translateX(0%) scaleX(0.7);
+  }
+  100% {
+    transform: translateX(100%) scaleX(0.4);
+  }
+}
+
+.fetch-rule {
+  animation: fetch-sweep 1.15s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fetch-rule {
+    animation: none;
+    transform: none;
+    opacity: 0.6;
+  }
+}

@@ -1,0 +1,138 @@
+{
+  "$schema": "aura brand tokens — source of truth: docs/brand-guidelines.md",
+  "meta": {
+    "brand": "Aura",
+    "system": "Swiss Modernism 2.0",
+    "mark": "Aura wordmark (Bricolage Grotesque + halo dot)",
+    "status": "locked"
+  },
+  "mark": {
+    "type": "wordmark",
+    "text": { "full": "Aura", "monogram": "A" },
+    "case": "capital first letter, lowercase rest — never all-caps or all-lowercase",
+    "font": {
+      "family": "Bricolage Grotesque",
+      "weight": 800,
+      "reservedForMarkOnly": true,
+      "trackingAtFontSize100": -3
+    },
+    "dot": {
+      "color": "#E4572E",
+      "radiusFactor": "0.16 * xHeight",
+      "gapFactor": "0.30 * xHeight",
+      "verticalPosition": "x-height mid-line",
+      "recolourable": false
+    },
+    "clearSpace": "0.5x cap-height of the capital A",
+    "forms": {
+      "fullWordmark": "used wherever the whole word fits: cover, nav, card/poster corner, share assets",
+      "monogram": "used in small square contexts (16-40px): app icon, favicon, tight nav slots"
+    },
+    "measurementNote": "dot size/position are derived from a measured x-height (render an x-height letter, read its bbox height), not a fixed pixel offset — reproduces correctly at any size",
+    "reference": "docs/brand-board.html — buildWordmark()"
+  },
+  "color": {
+    "brand": {
+      "vermilion": "#E4572E",
+      "gold": "#F5B301"
+    },
+    "dark": {
+      "ink": "#0B0A0A",
+      "surface": "#141211",
+      "surface2": "#1C1917",
+      "line": "rgba(245,241,234,.13)",
+      "line2": "rgba(245,241,234,.07)",
+      "fg": "#F5F1EA",
+      "fg2": "#A79E93",
+      "fg3": "#6E665D",
+      "vermilionText": "#F06B45",
+      "goldText": "#F5B301",
+      "gridGuide": "rgba(228,87,46,.30)"
+    },
+    "light": {
+      "ink": "#F7F4EF",
+      "surface": "#FFFFFF",
+      "surface2": "#EEEAE3",
+      "line": "rgba(11,10,10,.16)",
+      "line2": "rgba(11,10,10,.08)",
+      "fg": "#0B0A0A",
+      "fg2": "#57514A",
+      "fg3": "#8A8279",
+      "vermilionText": "#B93D19",
+      "goldText": "#8A6304",
+      "gridGuide": "rgba(185,61,25,.28)"
+    },
+    "surfaceRatio": { "ink": 0.62, "surface": 0.24, "vermilion": 0.08, "gold": 0.06 },
+    "rules": [
+      "Vermilion never exceeds 8% of any surface.",
+      "Gold is reserved for the aura gradient's warm pole and the 'saved' state only — never a button."
+    ]
+  },
+  "typography": {
+    "families": {
+      "display": "Inter, system-ui, sans-serif",
+      "quote": "Playfair Display, serif",
+      "mono": "JetBrains Mono, ui-monospace, monospace",
+      "arabic": "Noto Sans Arabic, sans-serif",
+      "wordmark": "Bricolage Grotesque, sans-serif (mark.font — logo only, never UI text)"
+    },
+    "weights": { "display": 800, "heading": 700, "body": 400, "quote": "400 italic" },
+    "scale": [
+      { "role": "display", "size": "clamp(60px,13vw,168px)", "weight": 800, "tracking": "-.055em" },
+      { "role": "coverWord", "size": "clamp(84px,19vw,250px)", "weight": 800, "tracking": "-.06em" },
+      { "role": "heading", "size": "28px", "weight": 700, "tracking": "-.03em" },
+      { "role": "body", "size": "16px", "weight": 400, "tracking": "normal" },
+      { "role": "quote", "size": "24px", "weight": "400 italic", "tracking": "normal" },
+      { "role": "mono", "size": "13px", "weight": 500, "tracking": ".06em" }
+    ],
+    "rules": [
+      "Display tracking is always negative.",
+      "Body never exceeds 68 characters per line.",
+      "Mono is never used for prose, only notation.",
+      "Playfair is italic-only — no roman weight exists in this system.",
+      "Bricolage Grotesque is reserved for the wordmark — never used in UI text."
+    ]
+  },
+  "aura": {
+    "description": "Deterministic per-handle colour, confined to an 80° arc anchored at vermilion's hue.",
+    "hash": "FNV-1a (32-bit)",
+    "constants": {
+      "VERM_HUE": 14,
+      "FAM_START": 330,
+      "FAM_SPAN": 80,
+      "saturationRange": [68, 84],
+      "luminanceRange": [52, 57]
+    },
+    "avatarRender": "single hairline ring (box-shadow), never a filled or blurred shape",
+    "gradient": "linear-gradient(135deg, hsl(h1 sat% lum%), hsl(h2 sat% (lum-8)%))"
+  },
+  "grid": {
+    "baseUnit": 8,
+    "containerMaxWidth": 1240,
+    "containerPadding": 40,
+    "columns": 12,
+    "gap": 24,
+    "breakpoints": {
+      "collapseToSingleColumn": 860,
+      "collapseGridTo6Columns": 640
+    }
+  },
+  "motion": [
+    { "name": "Vertical wipe", "where": "buttons (hover)", "durationMs": 380, "easing": "expo.out" },
+    { "name": "Plate reveal", "where": "on scroll into view", "durationMs": 750, "easing": "power1.out" },
+    { "name": "Rule draw", "where": "once, on load", "durationMs": 1100, "easing": "expo.out" },
+    { "name": "Aura pulse", "where": "ambient (brand dot)", "durationMs": 3200, "easing": "cubic-bezier(.4,0,.6,1)", "loop": true }
+  ],
+  "voice": {
+    "principles": [
+      "Verbs first.",
+      "Fragments over sentences.",
+      "No exclamation marks anywhere in the product.",
+      "Nothing claimed that can't be proven in the same sentence."
+    ],
+    "examples": {
+      "write": ["Sending.", "Up. Twelve saw it.", "Empty. Say something.", "Didn't land. Again.", "41 people."],
+      "neverWrite": ["Sending your post!", "Woohoo — 12 views 🎉", "Nothing here yet!", "Oops! Try again.", "Following 41 amazing people"]
+    }
+  }
+}

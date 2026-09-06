@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#F7F4EF" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0B0A0A" media="(prefers-color-scheme: dark)" />
+    <title>Aura</title>
+    <script>
+      // Resolve the theme before first paint so a dark-mode visitor never
+      // sees a white flash, and a light-mode visitor never sees a black one.
+      (function () {
+        try {
+          var saved = localStorage.getItem("aura-theme");
+          var theme =
+            saved ||
+            (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+          document.documentElement.setAttribute("data-theme", theme);
+        } catch (e) {
+          document.documentElement.setAttribute("data-theme", "light");
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <!--
+      AURA — DIRECTION CONTRACT (seed 05c6e942 · direction 5 of 7)
+
+      THESIS: Everyone here is a catalogued individual holding a number they
+      did not choose. Refuses the category default this project already
+      shipped and rejected: top bar, centre column, right rail.
+
+      OWN-WORLD: The museum accession record. Gallery-wall bone (#F7F4EF) or
+      night-vitrine ink (#0B0A0A), both designed, neither an inversion of the
+      other. Works are hung as plates; under each sits a tombstone label —
+      name, handle as catalogue number, date, and the author's aura as a
+      measured colour chip beside it, the way a colour-reference target sits
+      beside a photographed object. Archival rag, cotton tape, vitrine glass.
+      The look is catalogue-precise; the words stay plain — Post, Follow,
+      Save. A visual system, never a costume.
+
+      STORY: You browse a wall, not a column. A plate that holds you gets
+      taken down and examined as a full record, its label following it.
+
+      FIRST VIEWPORT: A catalogue index down the left edge lists the rooms.
+      The rest is wall: plates ranged at varying height, each labelled.
+      Text-only posts are plates too — the writing is the work, which is why
+      this world survives an API that returns poor images or none.
+
+      FORM: The Accession Card (assigned 5/7, seed 05c6e942).
+
+      FINISH: unreviewed and undocumented is unfinished; this build ends with
+      the finish review, the verdict, and DESIGN.md.
+    -->
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

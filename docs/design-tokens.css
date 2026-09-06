@@ -1,0 +1,64 @@
+/* ═══════════════════════════════════════════════════════════════
+   Aura — design tokens
+   Brand law: docs/brand-guidelines.md
+   Implementation: app/src/index.css (the running source of truth)
+
+   NOTE: this file previously described a dark-only "Swiss Modernism"
+   vocabulary in which `--ink` meant the page ground. The shipped app is
+   The Accession Card, where `--ink` is the label colour and `--ground` is
+   the page. The names below match the app.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* LIGHT · the gallery wall */
+:root,
+:root[data-theme="light"] {
+  --ground: #f7f4ef;
+  --plate: #ffffff;
+  --recess: #efebe4;
+  --rail: #e4dfd6;
+  --rail-strong: #d3ccc0;
+
+  --ink: #1a1613;
+  --ink-2: #57514a;
+  --ink-3: #726b64;
+
+  --verm: #e4572e;
+  --verm-ink: #b93d19;
+  --on-verm: #0b0a0a;
+  --gold-ink: #8a6304;
+}
+
+/* DARK · the night vitrine */
+:root[data-theme="dark"] {
+  --ground: #0b0a0a;
+  --plate: #141211;
+  --recess: #1c1917;
+  --rail: #292827;
+  --rail-strong: #3b3733;
+
+  --ink: #f5f1ea;
+  --ink-2: #a79e93;
+  --ink-3: #877e74;
+
+  --verm: #e4572e;
+  --verm-ink: #f06b45;
+  --on-verm: #0b0a0a;
+  --gold-ink: #f5b301;
+}
+
+/* Type — a fixed rem scale, chosen from rather than invented per screen. */
+:root {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --font-wordmark: "Bricolage Grotesque", "Inter", sans-serif; /* mark only */
+
+  --text-micro: 0.6875rem;
+  --text-label: 0.75rem;
+  --text-sm: 0.8125rem;
+  --text-base: 0.9375rem;
+  --text-read: 1.0625rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.625rem;
+  --text-2xl: 2.25rem;
+  --text-3xl: 3rem;
+}
